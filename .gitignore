@@ -1,0 +1,23 @@
+# Secrets — never commit (SRS §2)
+.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# PyCharm
+.idea/
+
+# macOS
+.DS_Store
+
+# Microsoft Office lock files (~$ prefix)
+~$*
+
+# Regenerable deck previews (referenced by no build script)
+deck/preview/

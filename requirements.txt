@@ -1,0 +1,9 @@
+# CosmoRelic runtime dependencies (SRS §1)
+gradio>=5.0
+openai>=1.50
+requests>=2.31
+python-dotenv>=1.0
+
+# Development only (SRS §1: jupyterlab, nbformat)
+jupyterlab>=4.0
+nbformat>=5.9
