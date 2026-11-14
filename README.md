@@ -153,6 +153,19 @@ project is *about* AI honesty:
 
 ---
 
+## Deploy CosmoRelic to Hugging Face Spaces
+
+CosmoRelic runs on any Python environment with `gradio` and the `openai` SDK (used as a client for Gemini's OpenAI-compatible endpoint). To deploy:
+
+1. **Create a new Hugging Face Space** — select **Python SDK** runtime.
+2. Upload these files to your Space repo: `app.py`, `core.py`, `cosmorelic_data.py`, `requirements.txt`.
+3. Go to **Settings → Repository secrets** and add `GEMINI_API_KEY` (the key is also accepted with a `models/` prefix, which CosmoRelic handles automatically).
+4. Switch the Space runtime to use pip-installed packages: create `requirements.txt` listing `gradio`, `openai`, `requests`, `python-dotenv`.
+
+The app exposes a Gradio Chat Interface on `/gradio/api/chat` and starts listening on port 7860 by default, which HF Spaces expects. No model downloads — inference runs on Gemini's cloud API; if the free-tier quota is exhausted the conversation falls back gracefully to locally stored archival data (zero latency).
+
+---
+
 ## License
 
 Apache-2.0 (see `LICENSE`). NASA data and imagery are used under the
