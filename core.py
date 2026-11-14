@@ -1,4 +1,4 @@
-# AI-assisted code (agentic AI + Groq gpt-oss-20b). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
 """All CosmoRelic logic lives here (SRS §0). app.py and the notebook only import.
 
 Nothing in this module may invent a number. Every value shown to a user is
@@ -23,8 +23,20 @@ for _p in (Path.cwd() / ".env", Path.cwd().parent / ".env"):
 AU_KM = 149_597_870.7
 LIGHT_KM_S = 299_792.458
 HORIZONS_URL = "https://ssd.jpl.nasa.gov/api/horizons.api"
-GROQ_BASE_URL = "https://api.groq.com/openai/v1"
-MODEL = "openai/gpt-oss-20b"
+
+# Gemini exposes an OpenAI-compatible endpoint, so the `openai` SDK we already
+# depend on can talk to it unchanged. Model id stays in the environment so it can
+# be corrected without editing code if Google renames it.
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+_GEMINI_MODEL_RAW = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
+# The OpenAI-compatible endpoint requires the `models/` prefix (the listing API
+# returns names like `models/gemini-2.5-flash-lite`).  If the user already added
+# it, use raw; otherwise prepend it so chat completions don't get a 404.
+GEMINI_MODEL = _GEMINI_MODEL_RAW if _GEMINI_MODEL_RAW.startswith("models/") else f"models/{_GEMINI_MODEL_RAW}"
+del _GEMINI_MODEL_RAW
+
+# gemini-2.5-flash-lite was deprecated for new users; this preview is the
+# current working replacement at the OpenAI-compatible endpoint as of Nov 2026.
 
 CACHE_TTL_S = 15 * 60
 CACHE = {}
@@ -261,15 +273,15 @@ def build_system_prompt(relic, facts_text) -> str:
 
 
 def _get_client():
-    """Lazy Groq client. Returns None when no key is configured, so the app still runs."""
-    key = os.getenv("GROQ_API_KEY", "").strip()
+    """Lazy Gemini client. Returns None when no key is configured, so the app still runs."""
+    key = os.getenv("GEMINI_API_KEY", "").strip()
     if not key:
         return None
     try:
         from openai import OpenAI
     except ImportError:
         return None
-    return OpenAI(api_key=key, base_url=GROQ_BASE_URL)
+    return OpenAI(api_key=key, base_url=GEMINI_BASE_URL)
 
 
 def _normalise_history(history):
@@ -369,16 +381,27 @@ def ask_relic(relic, question: str, history=None, facts_text: str = "") -> str:
     messages.append({"role": "user", "content": question})
 
     try:
+        # No reasoning_effort is sent. Gemini maps that parameter to a thinking
+        # budget, which adds latency and is rejected outright for some values,
+        # so omitting it keeps answers short and inside the timeout.
+        # max_tokens=600 gives enough room after the system prompt (~400 tokens)
+        # while keeping responses under Gemini's free-tier per-request limit.
+        import logging as _log  # noqa: E402 -- only used in error path
+        _log.warning(
+            "CosmoRelic ask_relic → model=%s baseURL=%s max_tokens=600",
+            GEMINI_MODEL, getattr(client.base_url, "host", client.base_url),
+        )
         response = client.chat.completions.create(
-            model=MODEL,
+            model=GEMINI_MODEL,
             messages=messages,
-            max_tokens=300,
+            max_tokens=600,
             temperature=0.5,
-            reasoning_effort="low",
-            timeout=10,
+            timeout=30,
         )
         answer = (response.choices[0].message.content or "").strip()
-    except Exception:
+    except Exception as _err:  # noqa: E402
+        import sys as _sys
+        print(f"[CosmoRelic error] ask_relic FAILED for {relic.get('name','?')}: {_err}", file=_sys.stderr, flush=True)
         return offline_story(relic, question)
 
     return safe_text(answer) if answer else offline_story(relic, question)

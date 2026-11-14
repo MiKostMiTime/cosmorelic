@@ -1,4 +1,4 @@
-# AI-assisted code (agentic AI + Groq gpt-oss-20b). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
 """Capture a real screenshot of the running app via the Chrome DevTools Protocol.
 
 Chrome's own --screenshot flag fires on the load event, which is too early for a

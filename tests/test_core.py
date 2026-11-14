@@ -1,8 +1,8 @@
-# AI-assisted code (agentic AI + Groq gpt-oss-20b). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
 """Acceptance tests for CosmoRelic (SRS §8). Run: python tests/test_core.py
 
 Every test prints PASS or FAIL and the script exits non-zero if any test fails.
-Tests T1-T4 and T6 make live Groq calls when GROQ_API_KEY is set; they fall back
+Tests T1-T4 and T6 make live Gemini calls when GEMINI_API_KEY is set; they fall back
 to the archive otherwise, so the suite is runnable with no key and no network.
 """
 
@@ -38,6 +38,7 @@ def test_t1():
 
 
 def test_t2():
+    time.sleep(8)  # Gemini free-tier rate limit: ~429 after rapid calls
     text = answer("apollo11_eagle", "What is the temperature there right now?")
     lowered = text.lower()
     admits = any(p in lowered for p in ("no active sensor", "no working sensor", "cannot", "don't have", "do not have"))
@@ -57,7 +58,9 @@ def test_t3():
 def test_t4():
     phrases = ("according to nasa", "nasa confirms", "nasa says", "nasa states")
     failures = []
-    for key in data.RELICS:
+    for i, key in enumerate(data.RELICS):
+        if i > 0:
+            time.sleep(5)  # Gemini free-tier rate limit between rapid relic calls
         text = answer(key, "Tell me about yourself.").lower()
         for phrase in phrases:
             if phrase in text:
@@ -76,9 +79,10 @@ def test_t5():
 
 
 def test_t6():
-    if not os.getenv("GROQ_API_KEY"):
-        check("T6", True, "skipped: no GROQ_API_KEY, archive path is instant")
+    if not os.getenv("GEMINI_API_KEY"):
+        check("T6", True, "skipped: no GEMINI_API_KEY, archive path is instant")
         return
+    time.sleep(8)  # Give rate limiter window after T1-T4 API calls
     start = time.perf_counter()
     answer("opportunity", "What did you find at Meridiani Planum?")
     elapsed = time.perf_counter() - start
@@ -86,12 +90,14 @@ def test_t6():
 
 
 def test_t7():
-    secret = re.compile(r"gsk_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}")
+    secret = re.compile(r"gsk_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_\-]{30,}")
     offenders = []
     for path in ROOT.rglob("*"):
         if not path.is_file():
             continue
-        if any(part in (".venv", ".git", "__pycache__", ".ipynb_checkpoints", ".idea") for part in path.parts):
+        # .env is the one file allowed to hold a key. It is excluded here and
+        # protected by .gitignore instead, which is asserted below.
+        if any(part in (".venv", ".git", "__pycache__", ".ipynb_checkpoints", ".idea", ".env") for part in path.parts):
             continue
         if path.suffix not in (".py", ".md", ".txt", ".ipynb", ".toml", ".example", ".json", ""):
             continue
@@ -106,14 +112,14 @@ def test_t7():
 
 
 def test_t8():
-    saved = os.environ.pop("GROQ_API_KEY", None)
+    saved = os.environ.pop("GEMINI_API_KEY", None)
     try:
         text = answer("viking1", "What ended your mission?")
         ok = bool(text.strip()) and "traceback" not in text.lower()
     finally:
         if saved is not None:
-            os.environ["GROQ_API_KEY"] = saved
-    check("T8", ok, "runs with no GROQ_API_KEY set")
+            os.environ["GEMINI_API_KEY"] = saved
+    check("T8", ok, "runs with no GEMINI_API_KEY set")
 
 
 def test_t9():

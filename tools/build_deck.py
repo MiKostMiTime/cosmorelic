@@ -347,7 +347,7 @@ def slide_6(prs):
             "Low-power mode shows an archival range, clearly labelled as such",
         ]),
         ("Disclosure", [
-            "gpt-oss-20b on Groq writes the dialogue only, from a closed list of numbers",
+            "Gemini writes the dialogue only, from a closed list of numbers",
             "No AI-generated images: NASA archival photography, credited exactly as published",
             "Not affiliated with or endorsed by NASA",
         ]),

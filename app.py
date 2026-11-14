@@ -1,4 +1,4 @@
-# AI-assisted code (agentic AI + Groq gpt-oss-20b). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
 """Gradio UI for CosmoRelic (SRS §6). All logic lives in core.py."""
 
 import gradio as gr

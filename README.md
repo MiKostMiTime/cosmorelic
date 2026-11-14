@@ -53,9 +53,9 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Optional: add a free Groq API key for live chat
+# 3. Optional: add a free Gemini API key for live chat
 cp .env.example .env
-# then paste your key after GROQ_API_KEY=   (https://console.groq.com/keys)
+# then paste your key after GEMINI_API_KEY=   (https://aistudio.google.com/apikey)
 
 # 4. Run
 python app.py                    # opens the web UI
@@ -124,12 +124,13 @@ Full source list: **[DATA_SOURCES.md](DATA_SOURCES.md)**.
 In the spirit of the Space Apps SI disclosure requirement, and because this
 project is *about* AI honesty:
 
-- **Code.** Written with agentic AI assistance (an AI coding agent plus the Groq
-  `openai/gpt-oss-20b` model). Every Python file states this in its first line,
+- **Code.** Written with agentic AI assistance (an AI coding agent plus the
+  Gemini model). Every Python file states this in its first line,
   and this section is the descriptive acknowledgement.
-- **Runtime model.** Persona chat uses `openai/gpt-oss-20b` served by Groq.
-  Responses are labelled **"AI-generated"** in the UI. The model receives only
-  the numbers from the data card and is forbidden from inventing others.
+- **Runtime model.** Persona chat uses a Gemini model served by Google, through
+  its OpenAI-compatible endpoint. Responses are labelled **"AI-generated"** in
+  the UI. The model receives only the numbers from the data card and is
+  forbidden from inventing others.
 - **Images.** **No AI-generated images are used anywhere.** Every photograph is
   credited NASA archival imagery. There is therefore no SI watermark to apply to
   any image, and none is claimed.

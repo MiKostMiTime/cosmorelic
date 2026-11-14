@@ -77,8 +77,7 @@ publishes the image; the credit line is reproduced exactly as NASA gives it.
 | JupyterLab | https://github.com/jupyterlab/jupyterlab | BSD-3-Clause |
 | nbformat | https://github.com/jupyter/nbformat | BSD-3-Clause |
 | Python | https://www.python.org/ | PSF-2.0 |
-| openai/gpt-oss-20b | https://huggingface.co/openai/gpt-oss-20b | Apache-2.0 |
-| Groq API | https://console.groq.com/docs/deprecations | Commercial terms of service |
+| Gemini API | https://ai.google.dev/gemini-api/docs/openai | Commercial terms of service |
 
 ---
 

@@ -12,12 +12,14 @@
 ## 1. Stack & model
 - Python 3.11+ (venv PyCharm). Library: gradio, openai, requests, python-dotenv.
   Dev: jupyterlab, nbformat.
-- Model: `openai/gpt-oss-20b` via Groq, base_url https://api.groq.com/openai/v1
-  (llama-3.1-8b-instant & llama-3.3-70b-versatile sudah di-shutdown 16 Agu 2026;
-  sumber: console.groq.com/docs/deprecations).
-- Kuota free: 30 req/menit, 8.000 token/menit, 200.000 token/hari.
-  Maka: prompt ≤ ±1.500 token, max_tokens=300, temperature=0.5 (lebih patuh
-  fakta), reasoning_effort="low", timeout=10, riwayat maksimal 6 pesan.
+- Model: Gemini via Google AI Studio, endpoint kompatibel-[OI]
+  https://generativelanguage.googleapis.com/v1beta/openai/ . Model id dibaca
+  dari env `GEMINI_MODEL` (default `gemini-2.5-flash-lite`), jadi bisa diganti
+  tanpa menyentuh kode kalau Google men-deprecate model lama.
+- Kuota free Gemini: cukup longgar untuk demo; tetap disiplin: prompt ≤ ±1.500
+  token, max_tokens=300, temperature=0.5, timeout=10, riwayat maksimal 6 pesan.
+  Tanpa `reasoning_effort` — di Gemini parameter itu memetakan ke thinking
+  budget (latensi naik, bisa 400 untuk nilai tertentu).
 
 ## 2. Struktur proyek
 cosmorelic/
@@ -32,14 +34,14 @@ cosmorelic/
 ├── README.md  DATA_SOURCES.md  LICENSE (Apache-2.0)  NOTICE
 
 Baris pertama tiap file .py (wajib):
-# AI-assisted code (agentic AI + Groq gpt-oss-20b). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
 
 .gitignore: .venv/ .env __pycache__/ .ipynb_checkpoints/
 
 ## 3. Setup PyCharm (saya, manusia)
 1. New Project → Interpreter: New Virtualenv → lokasi: cosmorelic.
 2. Terminal: `pip install -r requirements.txt`
-3. Buat `.env` berisi satu baris: GROQ_API_KEY=key_dari_console.groq.com
+3. Buat `.env` berisi satu baris: GEMINI_API_KEY=key_dari_aistudio.google.com/apikey
 4. Run → Edit Configurations → Script: app.py → Working dir: root → Run ▶
 5. Notebook: Terminal → `jupyter lab` → buka notebook/cosmorelic_dev.ipynb
    (PyCharm Community tidak punya editor .ipynb bawaan; lewat browser ini termudah).
@@ -189,8 +191,8 @@ ALWAYS: label every number [MEASURED]/[EPHEMERIS]/[DERIVED]/[ARCHIVAL]. Never
 invent facts. Never say "according to NASA" or "NASA confirms" — name the
 dataset instead ("JPL Horizons ephemeris", "NSSDCA catalog"). You are an AI
 storyteller, not the real spacecraft; admit it if asked. Correct myths politely.
-### 5.8 Client lazy: `_get_client()` return None kalau GROQ_API_KEY tidak ada → app tetap jalan.
-### 5.9 ask_relic(relic, question, history, facts_text): model openai/gpt-oss-20b, max_tokens=300, temperature=0.5, reasoning_effort="low", timeout=10; except → offline_story.
+### 5.8 Client lazy: `_get_client()` return None kalau GEMINI_API_KEY tidak ada → app tetap jalan.
+### 5.9 ask_relic(relic, question, history, facts_text): model dari GEMINI_MODEL (default gemini-2.5-flash-lite), max_tokens=300, temperature=0.5, timeout=10; except → offline_story.
 ### 5.10 safe_text(text): ganti (case-insensitive) "according to NASA"→"per the mission catalog", "NASA confirms"→"the mission record shows"; kembalikan teks bersih. Dipakai sebelum menampilkan jawaban.
 ### 5.11 offline_story(relic, question): keyword → story_hook + 2 fakta; awali "(Low-power mode: answering from my archived memory.)"; <0,5 detik, tanpa jaringan.
 
@@ -231,7 +233,7 @@ T4 semua jawaban lolos safe_text → tak ada frasa terlarang
 T5 offline=True → kartu + cerita <0,5 detik
 T6 chat normal biasanya <3 detik
 T7 tidak ada API key di file proyek; .env ada di .gitignore
-T8 tanpa GROQ_API_KEY → app tetap jalan
+T8 tanpa GEMINI_API_KEY → app tetap jalan
 T9 first_transmission untuk 8 artefak: non-kosong, <0,2 detik
 T10 setiap baris kartu punya tier + source; semua teks UI English; tak ada aset logo NASA
 GATE SUBMISSION: jumlah penanda verifikasi terbuka di seluruh proyek = 0.
@@ -330,5 +332,4 @@ Sembilan URL di §4.2 dimasukkan ke References apa adanya, dengan Link Text =
 | JupyterLab | https://github.com/jupyterlab/jupyterlab | BSD-3-Clause |
 | nbformat | https://github.com/jupyter/nbformat | BSD-3-Clause |
 | Python | https://www.python.org/ | PSF-2.0 |
-| openai/gpt-oss-20b | https://huggingface.co/openai/gpt-oss-20b | Apache-2.0 |
-| Groq API | https://console.groq.com/docs/deprecations | Commercial ToS |
+| Gemini API | https://ai.google.dev/gemini-api/docs/openai | Commercial ToS |
