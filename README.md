@@ -1,3 +1,13 @@
+---
+title: CosmoRelic
+emoji: 🛰️
+colorFrom: indigo
+colorTo: purple
+sdk: gradio
+app-port: 7860
+short_description: Ask 8 abandoned space missions about their final days - every number is labelled by how we know it
+---
+
 # CosmoRelic
 
 **Abandoned, but not forgotten.**
