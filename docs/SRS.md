@@ -26,8 +26,9 @@
 
 ## 2. Struktur proyek
 cosmorelic/
-├── .venv/  .env  .env.example  .gitignore
-├── requirements.txt
+├── .venv/  .env  .env.example  .gitignore  .dockerignore
+├── requirements.txt  requirements-runtime.txt
+├── Dockerfile               # deploy Replit / container (port via $PORT)
 ├── cosmorelic_data.py   # data statis 8 artefak + TEACHER_BOX
 ├── core.py              # SEMUA logika
 ├── app.py               # UI Gradio (import core)
@@ -281,10 +282,13 @@ lalu ekspor PDF). Isi per slide sesuai PRD §7. Aturan keras:
 - Slide 7 memuat daftar sumber NASA (ringkas) + link repo.
 - Tidak boleh kurang dari 7 slide.
 
-## 10. Opsional nanti
+## 10. Deploy
+Replit free (tanpa kartu; terpilih): import repo dari GitHub, build Dockerfile
+root, secret GROQ_API_KEY via Repl → Secrets; app bind 0.0.0.0:$PORT
+(fallback 7860). Free Replit tidur saat idle — offline fallback menjaga demo.
+HF Spaces: tetap kompatibel, tetapi free tier (Nov 2026) butuh PRO untuk Gradio.
 Colab: upload core.py, cosmorelic_data.py, app.py; key via Colab Secrets;
-launch(share=True). HF Spaces: SDK Gradio, 3 file + requirements.txt, key via
-Repository Secrets. Jangan kerjakan sebelum tes PASS.
+launch(share=True). Jangan kerjakan sebelum tes PASS.
 
 ## 11. Daftar referensi final (field References submission)
 Hanya NASA public domain + perangkat lunak open-source. **Tidak ada paper

@@ -1,6 +1,8 @@
 # AI-assisted code (agentic AI + LLM). Disclosure: see README.md.
 """Gradio UI for CosmoRelic (SRS §6). All logic lives in core.py."""
 
+import os
+
 import gradio as gr
 
 import core
@@ -174,4 +176,7 @@ with gr.Blocks(title="CosmoRelic") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(theme=gr.themes.Soft())
+    # Bind all interfaces; container hosts (Replit) inject $PORT,
+    # local runs fall back to Gradio's default 7860.
+    port = int(os.environ.get("PORT", "7860"))
+    demo.launch(theme=gr.themes.Soft(), server_name="0.0.0.0", server_port=port)

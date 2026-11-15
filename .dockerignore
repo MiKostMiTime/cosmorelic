@@ -1,0 +1,17 @@
+# Secrets — never build into the image (SRS §2)
+.env
+
+# Local environment & VCS (not needed in the container)
+.venv/
+.git/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.idea/
+.ipynb_checkpoints/
+.DS_Store
+~$*
+
+# Regenerable / not needed at runtime
+deck/preview/
+uv.lock
