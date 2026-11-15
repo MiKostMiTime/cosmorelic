@@ -27,7 +27,7 @@
 ## 2. Struktur proyek
 cosmorelic/
 ├── .venv/  .env  .env.example  .gitignore  .dockerignore
-├── requirements.txt  requirements-runtime.txt
+├── requirements.txt
 ├── Dockerfile               # deploy Streamlit / container (port via $PORT)
 ├── cosmorelic_data.py   # data statis 8 artefak + TEACHER_BOX
 ├── core.py              # SEMUA logika
@@ -286,7 +286,7 @@ lalu ekspor PDF). Isi per slide sesuai PRD §7. Aturan keras:
 
 ## 10. Deploy
 Streamlit Community Cloud (terpilih, gratis, tanpa kartu): share.streamlit.io →
-New app → repo GitHub → main file `app.py`, Requirements `requirements-runtime.txt`,
+New app → repo GitHub → main file `app.py`, requirements `requirements.txt`,
 secret GROQ_API_KEY via Secrets. Streamlit menidurkan app saat idle; buka pertama
 perlu beberapa detik. Docker: `Dockerfile` root (`streamlit run app.py`,
 `${PORT:-7860}`). Vercel/Cloudflare Pages tidak bisa (butuh proses Python hidup).

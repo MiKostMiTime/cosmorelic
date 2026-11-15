@@ -223,7 +223,13 @@ def telemetry_to_facts(cards) -> str:
 
 
 def telemetry_to_markdown(cards, agency_note="") -> str:
-    """Render the card as markdown with colour-coded tier badges."""
+    """Render the card as markdown with colour-coded tier badges.
+
+    The badges are inline HTML: render with `unsafe_allow_html=True`
+    (app.py) or the spans show up as literal text. The colours come from
+    the SRS §6 palette and are chosen to read on a light theme (white text
+    on a saturated fill).
+    """
     colors = {MEASURED: "#2e7d32", EPHEMERIS: "#1565c0", DERIVED: "#ef6c00", ARCHIVAL: "#616161"}
     out = []
     if agency_note:
@@ -235,7 +241,7 @@ def telemetry_to_markdown(cards, agency_note="") -> str:
             f"{c['value']}  \n"
             f"<span style='background:{color};color:#fff;padding:2px 8px;border-radius:4px;"
             f"font-size:0.75em;'>{c['tier']}</span> "
-            f"<span style='font-size:0.75em;color:#666;'>{c['source']}</span>\n"
+            f"<span style='font-size:0.78em;opacity:0.72;'>{c['source']}</span>\n"
         )
     return "\n".join(out)
 

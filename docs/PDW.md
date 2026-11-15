@@ -49,15 +49,15 @@ port sibuk → server_port=7861 ·
 
 ## 4. Perintah
 Windows: `.venv\Scripts\activate` | Mac/Linux: `source .venv/bin/activate`
-`pip install -r requirements.txt` · `python app.py` · `jupyter lab` ·
+`pip install -r requirements.txt` · `streamlit run app.py` · `jupyter lab` ·
 `python tests/test_core.py` · `git status`
 
 ## 5. Checklist submit (isi di halaman Project)
 - [x] Challenge dipilih: **01 — Abandoned but not Forgotten**
 - [ ] Deskripsi project English
 - [x] 7 slide di `deck/cosmorelic_deck.pptx` — **G2 LULUS** (tepat 7, English, tanpa logo NASA)
-- [ ] Nama tim + anggota diisi di slide 1 (placeholder `TEAM NAME ...`)
-- [ ] Link demo publik ditempel di slide 5 dan 7 (placeholder `LIVE DEMO ...`)
+- [x] Nama tim + anggota diisi di slide 1 (team name `CosmoRelic`)
+- [x] Link demo publik ditempel di slide 5 dan 7 (Streamlit Community Cloud)
 - [ ] Deck di-host publik tanpa login (juri butuh link, bukan file)
 - [ ] References field = SRS §11 (NASA + OSS saja) — G1
 - [ ] Checkbox "no copyrighted materials" dicentang dengan sadar

@@ -4,12 +4,20 @@
 [server]
 headless = true
 
+# Hide Streamlit's own "Deploy" button and developer chrome: judges should see
+# the app, not the platform's toolbar.
+[client]
+toolbarMode = "minimal"
+
 [browser]
 gatherUsageStats = false
 
+# Light theme only. Colours are chosen for contrast on white: the tier badges
+# (core.telemetry_to_markdown) are white text on the SRS §6 palette, and the
+# source caption dims to 72% opacity instead of using a fixed grey.
 [theme]
-base = "dark"
-primaryColor = "#7c8cf8"
-backgroundColor = "#0b0f1a"
-secondaryBackgroundColor = "#141a2b"
-textColor = "#e8ecf8"
+base = "light"
+primaryColor = "#4a56c9"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f5f9"
+textColor = "#1b1e28"

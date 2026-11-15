@@ -34,7 +34,7 @@ SHOT = ROOT / "screenshots" / "app_hero.png"
 
 # --- the two things only the author can supply ---------------------------------
 FILL_TEAM = "CosmoRelic"
-FILL_LINK = "LIVE DEMO - paste your hosted link here"
+FILL_LINK = "https://cosmorelic-mgn5fh4oex4zxfxjsrvxth.streamlit.app/"
 
 # --- design tokens --------------------------------------------------------------
 W, H = 13.333, 7.5           # inches, 16:9

@@ -105,7 +105,10 @@ def main():
         st.caption(f"{relic['image_title']} - {relic['image_credit']}")
         with st.spinner("Reading the live data card..."):
             cards = core.build_telemetry(relic, offline=offline)
-        st.markdown(core.telemetry_to_markdown(cards, relic.get("agency_note", "")))
+        st.markdown(
+            core.telemetry_to_markdown(cards, relic.get("agency_note", "")),
+            unsafe_allow_html=True,
+        )
         st.markdown(
             f"[Open {relic['body']} Trek to explore the surface]({relic['trek_url']})"
         )
@@ -116,7 +119,8 @@ def main():
         history_box = st.container(height=430)
         with history_box:
             for message in st.session_state.messages:
-                with st.chat_message(message["role"]):
+                avatar = "\U0001f6f0" if message["role"] == "assistant" else None
+                with st.chat_message(message["role"], avatar=avatar):
                     st.markdown(message["content"])
 
         with st.form("ask-the-relic", clear_on_submit=True):

@@ -165,7 +165,7 @@ CosmoRelic runs on any Python environment with `streamlit` and the `openai` SDK 
 
 1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub.
 2. **New app → Deploy a public app from GitHub** → repo `MiKostMiTime/cosmorelic`, branch `main`.
-3. Set **Main file path** to `app.py` and **Advanced settings → Requirements file** to `requirements-runtime.txt` (skips the Jupyter tooling).
+3. Leave the requirements and dependency fields on their defaults: the repo declares its four runtime libraries in both `requirements.txt` and `pyproject.toml` (with `uv.lock` for uv-based builds), so every install path gets the same packages.
 4. Under **Secrets**, paste:
 
    ```toml
