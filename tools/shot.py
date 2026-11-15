@@ -2,7 +2,7 @@
 """Capture a real screenshot of the running app via the Chrome DevTools Protocol.
 
 Chrome's own --screenshot flag fires on the load event, which is too early for a
-Gradio app: its first paint arrives from a server round-trip. This script opens
+Streamlit app: its first paint arrives from a server round-trip. This script opens
 the page, waits in real time for that round-trip to land, then captures.
 
 Usage:

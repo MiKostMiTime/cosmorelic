@@ -10,7 +10,7 @@
   Wikipedia, atau aset pihak ketiga. Sumber hanya dari §11.
 
 ## 1. Stack & model
-- Python 3.11+ (venv PyCharm). Library: gradio, openai, requests, python-dotenv.
+- Python 3.11+ (venv PyCharm). Library: streamlit, openai, requests, python-dotenv.
   Dev: jupyterlab, nbformat.
 - Model: Groq (OpenAI-compatible endpoint) https://api.groq.com/openai/v1 .
   Model id dibaca dari env `GROQ_MODEL` (default `llama-3.1-8b-instant`), jadi
@@ -28,10 +28,10 @@
 cosmorelic/
 ├── .venv/  .env  .env.example  .gitignore  .dockerignore
 ├── requirements.txt  requirements-runtime.txt
-├── Dockerfile               # deploy Replit / container (port via $PORT)
+├── Dockerfile               # deploy Streamlit / container (port via $PORT)
 ├── cosmorelic_data.py   # data statis 8 artefak + TEACHER_BOX
 ├── core.py              # SEMUA logika
-├── app.py               # UI Gradio (import core)
+├── app.py               # UI Streamlit (import core)
 ├── notebook/cosmorelic_dev.ipynb
 ├── tests/test_core.py
 ├── slides/cosmorelic_deck.pdf
@@ -200,27 +200,29 @@ storyteller, not the real spacecraft; admit it if asked. Correct myths politely.
 ### 5.10 safe_text(text): ganti (case-insensitive) "according to NASA"→"per the mission catalog", "NASA confirms"→"the mission record shows"; kembalikan teks bersih. Dipakai sebelum menampilkan jawaban.
 ### 5.11 offline_story(relic, question): keyword → story_hook + 2 fakta; awali "(Low-power mode: answering from my archived memory.)"; <0,5 detik, tanpa jaringan.
 
-## 6. app.py — UI Gradio (English)
-- Objek `demo = gr.Blocks(...)` di level modul; `demo.launch()` HANYA di dalam
-  `if __name__ == "__main__":` (supaya notebook bisa import tanpa auto-server).
-- Header: "CosmoRelic" + tagline "Abandoned, but not forgotten." + dropdown + Load.
+## 6. app.py — UI Streamlit (English)
+- Fungsi `main()` dipanggil di akhir modul (Streamlit menjalankan skrip saat
+  `streamlit run app.py`; tidak ada blok `__main__`).
+- Header: "CosmoRelic" + tagline "Abandoned, but not forgotten." + pilih relic (sidebar).
+- Sidebar: selectbox 8 artefak, checkbox Low-power mode, tombol Restart.
 - Kolom kiri: foto + judul foto + kredit; kartu telemetri ber-badge; link Trek.
-- Kolom kanan: gr.Chatbot(label="Ask the Relic — AI-generated stories");
-  saat Load, chat langsung diisi first_transmission(relic); textbox + Send;
-  3 tombol suggested_questions; catatan "AI-generated fiction grounded in cited data."
-- Accordion 1 "Data & Sources": legenda MEASURED/EPHEMERIS/DERIVED/ARCHIVAL + daftar sumber.
-- Accordion 2 "For Teachers": TEACHER_BOX.
+- Kolom kanan: container tinggi tetap berisi riwayat chat (dimulai
+  first_transmission saat relic/mode berubah); `st.chat_input`; 3 tombol
+  suggested_questions; catatan "AI-generated fiction grounded in cited data."
+- Expander 1 "Data & Sources": legenda MEASURED/EPHEMERIS/DERIVED/ARCHIVAL + daftar sumber.
+- Expander 2 "For Teachers": TEACHER_BOX.
 - Badge warna: MEASURED #2e7d32, EPHEMERIS #1565c0, DERIVED #ef6c00, ARCHIVAL #616161.
 - Footer persis: "AI-generated storytelling grounded in open NASA datasets.
   Not affiliated with or endorsed by NASA."
+- Riwayat disimpan di `st.session_state` (per sesi pengunjung).
 - DILARANG: logo NASA, mission patch, gambar orang, nama pengguna di UI.
 
 ## 7. notebook/cosmorelic_dev.ipynb (buat pakai nbformat; import core, jangan duplikasi)
 Sel: 1 judul · 2 (komentar) pip install · 3 path+import · 4 cek key ada/tidak
 (jangan print key) · 5 tabel 8 artefak · 6 uji live_range 301 & 499 ·
 7 build_telemetry · 8 telemetry_to_facts · 9 first_transmission ·
-10 tiga pertanyaan kritis · 11 uji offline + ukur waktu · 12 `import app;
-app.demo.launch(share=True)` · 13 catatan & TODO.
+10 tiga pertanyaan kritis · 11 uji offline + ukur waktu · 12 jalankan
+`streamlit run app.py` lewat subprocess · 13 catatan & TODO.
 Sel 3 wajib:
 ```python
 import sys, pathlib
@@ -245,9 +247,9 @@ GATE SUBMISSION: jumlah penanda verifikasi terbuka di seluruh proyek = 0.
 ## 9. Urutan build
 
 ### 9.1 Skeleton
-`requirements.txt` (gradio, openai, requests, python-dotenv, jupyterlab,
+`requirements.txt` (streamlit, openai, requests, python-dotenv, jupyterlab,
 nbformat), `.env.example`, `.gitignore`, `LICENSE` (Apache-2.0), `NOTICE`.
-Checkpoint: `import gradio, openai` sukses di venv.
+Checkpoint: `import streamlit, openai` sukses di venv.
 
 ### 9.2 Data 8 artefak
 Tulis `cosmorelic_data.py` memakai §4.2 dan §4.3 **apa adanya**. Jangan
@@ -283,9 +285,11 @@ lalu ekspor PDF). Isi per slide sesuai PRD §7. Aturan keras:
 - Tidak boleh kurang dari 7 slide.
 
 ## 10. Deploy
-Replit free (tanpa kartu; terpilih): import repo dari GitHub, build Dockerfile
-root, secret GROQ_API_KEY via Repl → Secrets; app bind 0.0.0.0:$PORT
-(fallback 7860). Free Replit tidur saat idle — offline fallback menjaga demo.
+Streamlit Community Cloud (terpilih, gratis, tanpa kartu): share.streamlit.io →
+New app → repo GitHub → main file `app.py`, Requirements `requirements-runtime.txt`,
+secret GROQ_API_KEY via Secrets. Streamlit menidurkan app saat idle; buka pertama
+perlu beberapa detik. Docker: `Dockerfile` root (`streamlit run app.py`,
+`${PORT:-7860}`). Vercel/Cloudflare Pages tidak bisa (butuh proses Python hidup).
 HF Spaces: tetap kompatibel, tetapi free tier (Nov 2026) butuh PRO untuk Gradio.
 Colab: upload core.py, cosmorelic_data.py, app.py; key via Colab Secrets;
 launch(share=True). Jangan kerjakan sebelum tes PASS.
@@ -332,7 +336,7 @@ Sembilan URL di §4.2 dimasukkan ke References apa adanya, dengan Link Text =
 ### 11.3 Perangkat lunak open-source
 | Link Text | URL | License |
 |---|---|---|
-| Gradio | https://github.com/gradio-app/gradio | Apache-2.0 |
+| Streamlit | https://github.com/streamlit/streamlit | Apache-2.0 |
 | OpenAI Python SDK | https://github.com/openai/openai-python | Apache-2.0 |
 | requests | https://github.com/psf/requests | Apache-2.0 |
 | python-dotenv | https://github.com/theskumar/python-dotenv | BSD-3-Clause |

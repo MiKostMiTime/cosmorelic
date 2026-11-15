@@ -1,6 +1,6 @@
 # CosmoRelic
 
-[![Open in Replit](https://replit.com/badge/github/MiKostMiTime/cosmorelic)](https://replit.com/github/MiKostMiTime/cosmorelic)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://cosmorelic-mgn5fh4oex4zxfxjsrvxth.streamlit.app/)
 
 **Abandoned, but not forgotten.**
 
@@ -60,7 +60,7 @@ cp .env.example .env
 # then paste your key after GROQ_API_KEY=   (https://console.groq.com/keys)
 
 # 4. Run
-python app.py                    # opens the web UI
+streamlit run app.py             # opens the web UI
 python tests/test_core.py        # runs the acceptance tests
 jupyter lab                      # then open notebook/cosmorelic_dev.ipynb
 ```
@@ -77,7 +77,7 @@ feature, not a degraded mode - see *Low-power mode* below.
 ```
 cosmorelic_data.py   static data: 8 relics, coordinates, facts, credits, TEACHER_BOX
 core.py              ALL logic: telemetry, tiers, prompts, myth-safe answers
-app.py               Gradio UI (imports core; contains no logic)
+app.py               Streamlit UI (imports core; contains no logic)
 notebook/            development notebook (imports core; re-implements nothing)
 tests/test_core.py   the acceptance suite
 tools/               build-time only: build_deck.py, build_notebook.py, shot.py
@@ -159,25 +159,42 @@ project is *about* AI honesty:
 
 ## Deploy CosmoRelic
 
-CosmoRelic runs on any Python environment with `gradio` and the `openai` SDK (used as a client for Groq's OpenAI-compatible endpoint). No model downloads — inference runs on Groq's cloud API; if the free-tier rate limit is hit or the key is missing, the conversation falls back gracefully to locally stored archival data (zero latency).
+CosmoRelic runs on any Python environment with `streamlit` and the `openai` SDK (used as a client for Groq's OpenAI-compatible endpoint). No model downloads — inference runs on Groq's cloud API; if the free-tier rate limit is hit or the key is missing, the conversation falls back gracefully to locally stored archival data (zero latency).
 
-### Replit (free, no credit card)
+### Streamlit Community Cloud (free, no credit card) — live
 
-1. Import this repo on Replit via the badge above (or [replit.com/github/MiKostMiTime/cosmorelic](https://replit.com/github/MiKostMiTime/cosmorelic)).
-2. In the Repl, open **Repl → Secrets** and add `GROQ_API_KEY` with your free key from [console.groq.com/keys](https://console.groq.com/keys). The key is **never** stored in the repo — `.env` is gitignored.
-3. Press **Run**. Replit builds the included `Dockerfile` and injects a `PORT` (typically 8080); the app binds `0.0.0.0` on that port (falls back to 7860).
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub.
+2. **New app → Deploy a public app from GitHub** → repo `MiKostMiTime/cosmorelic`, branch `main`.
+3. Set **Main file path** to `app.py` and **Advanced settings → Requirements file** to `requirements-runtime.txt` (skips the Jupyter tooling).
+4. Under **Secrets**, paste:
 
-Free Replit Repls sleep when idle, so the first request after a while may take 30–60 seconds to wake up. The offline fallback keeps the demo alive either way.
+   ```toml
+   GROQ_API_KEY = "your_key_from_console.groq.com/keys"
+   ```
 
-### Hugging Face Spaces
+5. **Deploy**. The first build takes a few minutes; later pushes to `main` redeploy automatically.
 
-The repo remains compatible with a Gradio Space. Note that as of November 2026 HF's free tier requires a PRO subscription to host Gradio Spaces, so Replit is the free path. If you have PRO: create a **Gradio SDK** Space from this repo and add the same `GROQ_API_KEY` secret under **Settings → Variables and secrets**.
+The key lives only in Streamlit's Secrets store — never in the repo (`.env` is gitignored).
+
+### Docker (any host)
+
+The included `Dockerfile` builds a slim Streamlit image and binds `${PORT:-7860}`:
+
+```bash
+docker build -t cosmorelic .
+docker run -p 7860:7860 -e GROQ_API_KEY="your_key" cosmorelic
+```
+
+### Notes on other platforms
+
+- **Vercel / Cloudflare Pages** cannot run this app: they serve static assets and short-lived serverless functions, while Streamlit needs a persistent Python process.
+- **Hugging Face Spaces**: the free tier now requires PRO for compute-backed Spaces.
 
 ### Local
 
 ```bash
 pip install -r requirements.txt
-python app.py   # http://127.0.0.1:7860 (or $PORT if set)
+streamlit run app.py   # http://localhost:8501
 ```
 
 ---

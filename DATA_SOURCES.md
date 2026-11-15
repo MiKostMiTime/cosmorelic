@@ -70,7 +70,7 @@ publishes the image; the credit line is reproduced exactly as NASA gives it.
 
 | Link Text | URL | License |
 |---|---|---|
-| Gradio | https://github.com/gradio-app/gradio | Apache-2.0 |
+| Streamlit | https://github.com/streamlit/streamlit | Apache-2.0 |
 | OpenAI Python SDK | https://github.com/openai/openai-python | Apache-2.0 |
 | requests | https://github.com/psf/requests | Apache-2.0 |
 | python-dotenv | https://github.com/theskumar/python-dotenv | BSD-3-Clause |

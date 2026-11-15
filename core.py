@@ -300,7 +300,7 @@ def _get_client():
 
 
 def _normalise_history(history):
-    """Accept Gradio's message dicts and keep only the last six turns."""
+    """Accept chat message dicts and keep only the last six turns."""
     if not history:
         return []
     out = []
@@ -424,7 +424,7 @@ def ask_relic(relic, question: str, history=None, facts_text: str = "") -> str:
                 )
                 raw = response.choices[0].message.content or ""
                 # Some models return structured content blocks instead of plain text.
-                # Flatten them so Gradio's chatbot never sees a list-of-dicts.
+                # Flatten them so the chat UI never sees a list-of-dicts.
                 if isinstance(raw, list):
                     answer = " ".join(
                         block.get("text", "") if isinstance(block, dict) else str(block)

@@ -1,5 +1,0 @@
-# CosmoRelic runtime dependencies (SRS §1) — installed by the Dockerfile
-gradio>=5.0
-openai>=1.50
-requests>=2.31
-python-dotenv>=1.0

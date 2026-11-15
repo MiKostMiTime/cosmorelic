@@ -2,7 +2,7 @@
 
 BUILD-TIME TOOL ONLY. `python-pptx` is used once to write the deck file; it is
 deliberately NOT part of the app. The running application still needs only
-gradio, openai, requests and python-dotenv, exactly as SRS §2 says.
+streamlit, openai, requests and python-dotenv, exactly as SRS §2 says.
 
 Run:  .venv/bin/python tools/build_deck.py
 Out:  deck/cosmorelic_deck.pptx

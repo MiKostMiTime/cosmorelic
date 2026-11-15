@@ -39,9 +39,8 @@ Pelajar sekolah & guru (utama, sesuai challenge), juri hackathon (pembukti),
 portofolio saya (kedua).
 
 ## 5. Lingkungan kerja
-PyCharm (proyek Python lokal) + Jupyter Notebook (.ipynb) + deploy Replit free
-(tanpa kartu; HF Spaces free Nov 2026 butuh PRO untuk Gradio) + opsional Colab.
-Biaya Rp 0, tanpa GPU, tanpa training.
+PyCharm (proyek Python lokal) + Jupyter Notebook (.ipynb) + deploy Streamlit
+Community Cloud (gratis, tanpa kartu). Biaya Rp 0, tanpa GPU, tanpa training.
 
 ## 6. Scope
 

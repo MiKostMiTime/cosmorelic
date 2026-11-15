@@ -58,7 +58,7 @@ pip install -r requirements.txt
 
 **Why a separate step.** Installing packages is a setup action, not something
 you want to repeat every time you rerun the notebook. The project deliberately
-uses only four runtime libraries — `gradio`, `openai`, `requests` and
+uses only four runtime libraries — `streamlit`, `openai`, `requests` and
 `python-dotenv` — so this stays fast and predictable.
 
 **What you should see.** Either nothing (already installed) or a short download.
@@ -409,28 +409,30 @@ md(
     """
 ## 11. Start the real web app from the notebook
 
-**What this cell does.** It imports `app` and launches the Gradio interface, the
-same object a visitor sees in the browser.
+**What this cell does.** It launches the Streamlit interface in a background
+process — the same app a visitor sees in the browser.
 
-**Why importing is safe.** `app.py` only calls `demo.launch()` inside its
-`if __name__ == "__main__":` block. Importing the module therefore builds the
-interface without starting a server — so this cell decides *when* the server
-starts, and you can rerun the cells above without opening a second one.
+**Why a subprocess.** A Streamlit script runs top to bottom on every interaction,
+so it is started with `streamlit run app.py` rather than imported. Running it in
+the background leaves the notebook responsive; stop it with the printed command.
 
-**What you should see.** A local URL and, because `share=True`, a temporary
-public link. This is a development convenience only — the submitted demo is
-hosted separately.
+**What you should see.** A local URL (usually http://localhost:8501). This is a
+development convenience only — the submitted demo is hosted on Streamlit
+Community Cloud.
 
-**If the port is busy.** Stop the previous run, or launch with
-`server_port=7861`.
+**If the port is busy.** Stop the previous run, or pass `--server.port 8502`.
 """
 )
 
 code(
     r"""
-import app
+import subprocess, sys
 
-app.demo.launch(share=True)
+proc = subprocess.Popen(
+    [sys.executable, "-m", "streamlit", "run", "app.py", "--server.headless", "true"]
+)
+print("Streamlit running at http://localhost:8501")
+print("Stop it later with:", f"kill {proc.pid}")
 """
 )
 

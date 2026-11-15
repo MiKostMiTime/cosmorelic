@@ -1,0 +1,15 @@
+# CosmoRelic deployment (Streamlit Community Cloud).
+# Only runtime deps are installed there (see requirements.txt / uv.lock).
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "dark"
+primaryColor = "#7c8cf8"
+backgroundColor = "#0b0f1a"
+secondaryBackgroundColor = "#141a2b"
+textColor = "#e8ecf8"
