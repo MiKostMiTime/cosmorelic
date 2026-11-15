@@ -33,7 +33,7 @@ OUT_FILE = OUT_DIR / "cosmorelic_deck.pptx"
 SHOT = ROOT / "screenshots" / "app_hero.png"
 
 # --- the two things only the author can supply ---------------------------------
-FILL_TEAM = "TEAM NAME - add your team name and members here"
+FILL_TEAM = "CosmoRelic"
 FILL_LINK = "LIVE DEMO - paste your hosted link here"
 
 # --- design tokens --------------------------------------------------------------
