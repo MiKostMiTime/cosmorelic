@@ -1,4 +1,4 @@
-# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Groq). Disclosure: see README.md.
 """Static data for the eight CosmoRelic artifacts (SRS §4).
 
 Every coordinate, date and credit below is copied from SRS §4.2-§4.4 and is

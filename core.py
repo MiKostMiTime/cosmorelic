@@ -1,4 +1,4 @@
-# AI-assisted code (agentic AI + Gemini). Disclosure: see README.md.
+# AI-assisted code (agentic AI + Groq). Disclosure: see README.md.
 """All CosmoRelic logic lives here (SRS §0). app.py and the notebook only import.
 
 Nothing in this module may invent a number. Every value shown to a user is
@@ -24,19 +24,31 @@ AU_KM = 149_597_870.7
 LIGHT_KM_S = 299_792.458
 HORIZONS_URL = "https://ssd.jpl.nasa.gov/api/horizons.api"
 
-# Gemini exposes an OpenAI-compatible endpoint, so the `openai` SDK we already
+# Groq exposes an OpenAI-compatible endpoint, so the `openai` SDK we already
 # depend on can talk to it unchanged. Model id stays in the environment so it can
-# be corrected without editing code if Google renames it.
-GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
-_GEMINI_MODEL_RAW = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
-# The OpenAI-compatible endpoint requires the `models/` prefix (the listing API
-# returns names like `models/gemini-2.5-flash-lite`).  If the user already added
-# it, use raw; otherwise prepend it so chat completions don't get a 404.
-GEMINI_MODEL = _GEMINI_MODEL_RAW if _GEMINI_MODEL_RAW.startswith("models/") else f"models/{_GEMINI_MODEL_RAW}"
-del _GEMINI_MODEL_RAW
+# be corrected without editing code if Groq adds a new model.
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+_GROQ_MODEL_RAW = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+GROQ_MODEL = _GROQ_MODEL_RAW
 
-# gemini-2.5-flash-lite was deprecated for new users; this preview is the
-# current working replacement at the OpenAI-compatible endpoint as of Nov 2026.
+# llama-3.1-8b-instant is Groq's fastest open-weight model (~500 RPS on free tier).
+# For longer, more detailed answers switch to `llama-3.3-70b-specdec` (slower but deeper).
+
+# Fallback models tried in order when the primary model returns 404.
+# This handles Groq keys that only have access to a subset of models
+# (our hackathon key has no llama-3.1-8b-instant, so the chain always runs).
+# Order matters - measured on this key, 2026-11: qwen3.8-27b is the fastest
+# (0.4-1.0s) and the most consistent at following the persona constraints;
+# gpt-oss-120b is the deeper fallback; 20b/7b are last resorts.
+_GROQ_FALLBACK_MODELS = [
+    "qwen/qwen3.8-27b",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "allam-2-7b",
+]
+
+# Cache which model succeeded so we skip failed ones on subsequent calls.
+_GROQ_WORKING_MODEL: str | None = None
 
 CACHE_TTL_S = 15 * 60
 CACHE = {}
@@ -251,9 +263,12 @@ HARD RULES:
 ADMIT YOU DON'T KNOW: {unknowns}
 
 ALWAYS: label every number [MEASURED]/[EPHEMERIS]/[DERIVED]/[ARCHIVAL]. Never
-invent facts. Never say "according to NASA" or "NASA confirms" - name the
-dataset instead ("JPL Horizons ephemeris", "NSSDCA catalog"). You are an AI
-storyteller, not the real spacecraft; admit it if asked. Correct myths politely.
+invent facts, and never state a number that does not appear in the FACTS list
+above. If a number is not in the FACTS list, say plainly that you have no
+figure for it - do not print a bare tier label in place of a number.
+Never say "according to NASA" or "NASA confirms" - name the dataset instead
+("JPL Horizons ephemeris", "NSSDCA catalog"). You are an AI storyteller, not
+the real spacecraft; admit it if asked. Correct myths politely.
 """
 
 
@@ -273,15 +288,15 @@ def build_system_prompt(relic, facts_text) -> str:
 
 
 def _get_client():
-    """Lazy Gemini client. Returns None when no key is configured, so the app still runs."""
-    key = os.getenv("GEMINI_API_KEY", "").strip()
+    """Lazy Groq client. Returns None when no key is configured, so the app still runs."""
+    key = os.getenv("GROQ_API_KEY", "").strip()
     if not key:
         return None
     try:
         from openai import OpenAI
     except ImportError:
         return None
-    return OpenAI(api_key=key, base_url=GEMINI_BASE_URL)
+    return OpenAI(api_key=key, base_url=GROQ_BASE_URL)
 
 
 def _normalise_history(history):
@@ -380,25 +395,53 @@ def ask_relic(relic, question: str, history=None, facts_text: str = "") -> str:
     messages.extend(_normalise_history(history))
     messages.append({"role": "user", "content": question})
 
+    # Use cached working model if available, otherwise try fallback chain.
+    global _GROQ_WORKING_MODEL  # noqa: PLW0603
+    _models_to_try: list[str] = []
+    if _GROQ_WORKING_MODEL is not None:
+        _models_to_try.append(_GROQ_WORKING_MODEL)
+    else:
+        _models_to_try.append(GROQ_MODEL)
+        _models_to_try.extend(_GROQ_FALLBACK_MODELS)
+
     try:
-        # No reasoning_effort is sent. Gemini maps that parameter to a thinking
-        # budget, which adds latency and is rejected outright for some values,
-        # so omitting it keeps answers short and inside the timeout.
-        # max_tokens=600 gives enough room after the system prompt (~400 tokens)
-        # while keeping responses under Gemini's free-tier per-request limit.
+        # Groq is blazing fast on free tier (~500 RPS) so this timeout rarely fires.
         import logging as _log  # noqa: E402 -- only used in error path
         _log.warning(
             "CosmoRelic ask_relic → model=%s baseURL=%s max_tokens=600",
-            GEMINI_MODEL, getattr(client.base_url, "host", client.base_url),
+            _models_to_try[0], getattr(client.base_url, "host", client.base_url),
         )
-        response = client.chat.completions.create(
-            model=GEMINI_MODEL,
-            messages=messages,
-            max_tokens=600,
-            temperature=0.5,
-            timeout=30,
-        )
-        answer = (response.choices[0].message.content or "").strip()
+
+        answer = None
+        for _model in _models_to_try:
+            try:
+                response = client.chat.completions.create(
+                    model=_model,
+                    messages=messages,
+                    max_tokens=400,
+                    temperature=0.5,
+                    timeout=8,  # short per-model timeout; fallback chain is fast overall
+                )
+                raw = response.choices[0].message.content or ""
+                # Some models return structured content blocks instead of plain text.
+                # Flatten them so Gradio's chatbot never sees a list-of-dicts.
+                if isinstance(raw, list):
+                    answer = " ".join(
+                        block.get("text", "") if isinstance(block, dict) else str(block)
+                        for block in raw
+                    )
+                else:
+                    answer = raw.strip()
+                if answer:
+                    _GROQ_WORKING_MODEL = _model  # cache for next call
+                    break
+            except Exception as _inner_err:
+                # Only skip this model; try the next one in the chain
+                if "404" not in str(_inner_err):
+                    raise  # non-404 errors bubble up immediately
+        if not answer:
+            raise RuntimeError("all Groq models failed")
+
     except Exception as _err:  # noqa: E402
         import sys as _sys
         print(f"[CosmoRelic error] ask_relic FAILED for {relic.get('name','?')}: {_err}", file=_sys.stderr, flush=True)

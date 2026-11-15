@@ -347,7 +347,7 @@ def slide_6(prs):
             "Low-power mode shows an archival range, clearly labelled as such",
         ]),
         ("Disclosure", [
-            "Gemini writes the dialogue only, from a closed list of numbers",
+            "An open-weight LLM (Groq) writes the dialogue only, from a closed list of numbers",
             "No AI-generated images: NASA archival photography, credited exactly as published",
             "Not affiliated with or endorsed by NASA",
         ]),

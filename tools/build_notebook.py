@@ -121,7 +121,7 @@ yes/no** answer.
 2. The key must never be printed, logged or committed. Printing `bool(key)`
    instead of `key` is the simplest way to keep that promise.
 
-**What you should see.** `GEMINI_API_KEY present: True` or `... False`.
+**What you should see.** `GROQ_API_KEY present: True` or `... False`.
 **Both are correct.** `False` means the relics answer from archived memory
 instead of from the language model, and the next cells still run.
 """
@@ -134,9 +134,9 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(ROOT / ".env")
-key = os.getenv("GEMINI_API_KEY", "").strip()
+key = os.getenv("GROQ_API_KEY", "").strip()
 
-print("GEMINI_API_KEY present:", bool(key))
+print("GROQ_API_KEY present:", bool(key))
 print("Without a key the app still runs - every answer falls back to archived memory.")
 """
 )

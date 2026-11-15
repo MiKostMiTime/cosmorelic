@@ -38,7 +38,7 @@ references mepet → §11 SRS sudah final, tinggal salin.
 ## 3. Troubleshooting
 ModuleNotFoundError → interpreter harus .venv, pip install ulang ·
 401 → cek .env (bukan .env.txt), tanpa kutip/spasi ·
-404 model → ganti GEMINI_MODEL di .env (id valid lihat aistudio) ·
+404 model → fallback chain otomatis; manual: ganti GROQ_MODEL di .env (id valid: `curl https://api.groq.com/openai/v1/models`) ·
 429 → tunggu / low-power mode ·
 notebook "No module named core" → pakai sel 3 ·
 port sibuk → server_port=7861 ·

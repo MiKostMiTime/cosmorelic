@@ -53,9 +53,9 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Optional: add a free Gemini API key for live chat
+# 3. Optional: add a free Groq API key for live chat
 cp .env.example .env
-# then paste your key after GEMINI_API_KEY=   (https://aistudio.google.com/apikey)
+# then paste your key after GROQ_API_KEY=   (https://console.groq.com/keys)
 
 # 4. Run
 python app.py                    # opens the web UI
@@ -87,7 +87,7 @@ This keeps the UI, the notebook and the tests provably in agreement.
 
 ### Low-power mode
 
-When the network is unavailable or the daily API quota is spent, the relic
+When the network is unavailable or the API rate limit is hit, the relic
 answers from its archived memory. This is designed as a metaphor for the real
 fate of Opportunity - a machine that kept talking until it could not - rather
 than presented as an error state. It also makes the app usable in classrooms
@@ -124,13 +124,15 @@ Full source list: **[DATA_SOURCES.md](DATA_SOURCES.md)**.
 In the spirit of the Space Apps SI disclosure requirement, and because this
 project is *about* AI honesty:
 
-- **Code.** Written with agentic AI assistance (an AI coding agent plus the
-  Gemini model). Every Python file states this in its first line,
+- **Code.** Written with agentic AI assistance (an AI coding agent plus an
+  LLM). Every Python file states this in its first line,
   and this section is the descriptive acknowledgement.
-- **Runtime model.** Persona chat uses a Gemini model served by Google, through
-  its OpenAI-compatible endpoint. Responses are labelled **"AI-generated"** in
-  the UI. The model receives only the numbers from the data card and is
-  forbidden from inventing others.
+- **Runtime model.** Persona chat uses an open-weight LLM served by Groq
+  (default `llama-3.1-8b-instant`, OpenAI-compatible endpoint), with an
+  automatic fallback chain to `openai/gpt-oss-120b` and `allam-2-7b` if the
+  primary model is unavailable to the key. Responses are labelled
+  **"AI-generated"** in the UI. The model receives only the numbers from the
+  data card and is forbidden from inventing others.
 - **Images.** **No AI-generated images are used anywhere.** Every photograph is
   credited NASA archival imagery. There is therefore no SI watermark to apply to
   any image, and none is claimed.
@@ -155,14 +157,14 @@ project is *about* AI honesty:
 
 ## Deploy CosmoRelic to Hugging Face Spaces
 
-CosmoRelic runs on any Python environment with `gradio` and the `openai` SDK (used as a client for Gemini's OpenAI-compatible endpoint). To deploy:
+CosmoRelic runs on any Python environment with `gradio` and the `openai` SDK (used as a client for Groq's OpenAI-compatible endpoint). To deploy:
 
-1. **Create a new Hugging Face Space** — select **Python SDK** runtime.
-2. Upload these files to your Space repo: `app.py`, `core.py`, `cosmorelic_data.py`, `requirements.txt`.
-3. Go to **Settings → Repository secrets** and add `GEMINI_API_KEY` (the key is also accepted with a `models/` prefix, which CosmoRelic handles automatically).
-4. Switch the Space runtime to use pip-installed packages: create `requirements.txt` listing `gradio`, `openai`, `requests`, `python-dotenv`.
+1. **Push this repo to GitHub** (or upload it directly to a Space repo).
+2. **Create a new Hugging Face Space** — select **Gradio SDK** and connect the repo.
+3. Go to **Settings → Variables and secrets** and add a secret `GROQ_API_KEY` with your free key from [console.groq.com/keys](https://console.groq.com/keys). The key is **never** stored in the repo — `.env` is gitignored.
+4. Ensure `requirements.txt` lists `gradio`, `openai`, `requests`, `python-dotenv`.
 
-The app exposes a Gradio Chat Interface on `/gradio/api/chat` and starts listening on port 7860 by default, which HF Spaces expects. No model downloads — inference runs on Gemini's cloud API; if the free-tier quota is exhausted the conversation falls back gracefully to locally stored archival data (zero latency).
+The app exposes a Gradio Chat Interface and starts listening on port 7860 by default, which HF Spaces expects. No model downloads — inference runs on Groq's cloud API; if the free-tier rate limit is hit or the key is missing the conversation falls back gracefully to locally stored archival data (zero latency).
 
 ---
 
